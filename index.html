@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Format File</title>
+  <link rel="stylesheet" href="bootstrap-5.2.0-dist/css/bootstrap.min.css">
+  <script src="bootstrap-5.2.0-dist/js/bootstrap.min.js"></script>
+  <style>
+    body {
+      background-color: #020030;
+      background-image: url("light-wool.png");
+    }
+
+    form {
+      margin: 30px 65%;
+      padding: 15px;
+      background-color: #ffffff;
+      opacity: 0.8;
+      border-radius: 30px;
+    }
+
+    #file-selector {
+      margin: 0 30%;
+      width: 44%;
+    }
+
+    #file_output {
+      width: 500px;
+      height: 100px;
+      overflow: auto;
+      border: 1px solid #090979;
+      margin: 0 30%;
+      padding: 10px;
+      border-radius: 15px;
+    }
+
+    h1,
+    hr {
+      color: #ffffff;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container text-center">
+    <h1>Format File</h1>
+    <hr>
+    <div class="row justify-content-md-center">
+      <form enctype="multipart/form-data">
+        <div class="col-lg-12 file-loading mt-3">
+          <h2>Upload File</h2>
+        </div>
+        <div class="col-lg-12 file-loading mt-3">
+          <input id="file-selector" class="form-control form-control-lg" type="file" accept=".doc, .txt, .docx"
+            onchange="previewFile()">
+        </div>
+        <div class="row" id="output">
+          <div class="col-lg-12 mt-3" id="file_output"></div>
+          <div class="col-lg-12 mt-3">
+            <button type="button" class="btn btn-primary" onclick="createOutput()">Download</button>
+            <button type="reset" class="btn btn-outline-secondary" onclick="resetForm()">Reset</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
+<script>
+  const content = document.getElementById('file_output');
+  const reader = new FileReader();
+
+  window.onload = function () {
+    document.getElementById('output').style.display = 'none';
+  }
+
+  function previewFile() {
+    const [file] = document.getElementById('file-selector').files;
+
+    reader.addEventListener("load", () => {
+      content.innerText = reader.result;
+      document.getElementById('output').style.display = 'block';
+    }, false);
+
+    if (file) {
+      reader.readAsText(file);
+    }
+  }
+
+  function resetForm() {
+    document.getElementById('output').style.display = 'none';
+  }
+
+  function addLeadingZeros(input) {
+    input++;
+    input = input.toString();
+
+    if (input.length < 4) {
+      return input.padStart(3, '0');
+    } else {
+      return input;
+    }
+  }
+
+  function createOutput() {
+    const lines = reader.result.split('\n');
+    const date = new Date();
+    const name = "output_" + date.getTime() + ".txt";
+    const type = "application/txt";
+    let textOutput = '';
+    let index = 0;
+
+    lines.forEach((item, aux) => {
+      index = addLeadingZeros(aux);
+      textOutput += `multipath {
+        wwid ${item}
+        alias mpath_NomeDefinido_${index}
+      }\n\n`;
+    });
+
+    downloadFile(textOutput, type, name);
+  }
+
+  function downloadFile(data, type, name) {
+    let link = document.createElement("a");
+    let blob = new Blob([data], {
+      type
+    });
+    let url = window.URL.createObjectURL(blob);
+
+    link.download = name;
+    link.href = url;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  }
+</script>
+
+</html>
