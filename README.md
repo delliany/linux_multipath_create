@@ -1,6 +1,6 @@
 # linux_multipath_create
 
-## Ler um arquivo com sequencial de números em txt/doc/docx e voltar um arquivo txt com o script:
+## Ler um arquivo com sequencial de números em txt e voltar um arquivo txt com o script:
 ```sh
 multipath {
     wwid {sequencial}
