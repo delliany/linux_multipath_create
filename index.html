@@ -7,7 +7,8 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Format File</title>
   <link rel="stylesheet" href="bootstrap-5.2.0-dist/css/bootstrap.min.css">
-  <script src="bootstrap-5.2.0-dist/js/bootstrap.min.js"></script>
+  <script src="bootstrap-5.2.0-dist/js/bootstrap.bundle.min.js"></script>
+  <script src="jquery-3.6.0.min.js"></script>
   <style>
     body {
       background-color: #020030;
@@ -54,7 +55,7 @@
           <h2>Upload File</h2>
         </div>
         <div class="col-lg-12 file-loading mt-3">
-          <input id="file-selector" class="form-control form-control-lg" type="file" accept=".doc, .txt, .docx"
+          <input id="file-selector" class="form-control form-control-lg" type="file" accept=".txt"
             onchange="previewFile()">
         </div>
         <div class="row" id="output">
@@ -65,6 +66,21 @@
           </div>
         </div>
       </form>
+    </div>
+  </div>
+  <!-- Modal -->
+  <div class="modal fade" id="alert_error" tabindex="-1" aria-labelledby="alert_errorLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="alert_errorLabel">Error</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="modal-body"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
     </div>
   </div>
 </body>
@@ -105,22 +121,29 @@
   }
 
   function createOutput() {
-    const lines = reader.result.split('\n');
-    const date = new Date();
-    const name = "output_" + date.getTime() + ".txt";
-    const type = "application/txt";
-    let textOutput = '';
-    let index = 0;
+    try {
+      const lines = reader.result.split('\n');
+      const date = new Date();
+      const name = "output_" + date.getTime() + ".txt";
+      const type = "application/txt";
+      let textOutput = '';
+      let index = 0;
 
-    lines.forEach((item, aux) => {
-      index = addLeadingZeros(aux);
-      textOutput += `multipath {
+      lines.forEach((item, aux) => {
+        index = addLeadingZeros(aux);
+        textOutput += `multipath {
         wwid ${item}
         alias mpath_NomeDefinido_${index}
       }\n\n`;
-    });
+      });
 
-    downloadFile(textOutput, type, name);
+      downloadFile(textOutput, type, name);
+
+    } catch (error) {
+      document.getElementById('modal-body').innerText = error.message;
+
+      $('#alert_error').modal('show');
+    }
   }
 
   function downloadFile(data, type, name) {
